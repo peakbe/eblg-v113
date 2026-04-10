@@ -1,5 +1,5 @@
 // =========================
-// APP.JS PRO+
+// APP.JS PRO+ (VERSION CORRIGÉE)
 // =========================
 
 import { initMap } from "./map.js";
@@ -8,36 +8,14 @@ import "./metar.js";
 import "./taf.js";
 import "./fids.js";
 import "./sonometers.js";
+
 import { updateStatusPanel } from "./status.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("[APP] Initialisation…");
-
-    const map = initMap();
-    if (!map) return;
-
-    updateStatusPanel();
-});
-
 import { updateLogs } from "./logs.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-    const map = initMap();
-    if (!map) return;
-
-    updateStatusPanel();  // déjà en place
-    updateLogs();         // nouveau
-});
 import { startLiveLogs } from "./logsLive.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const map = initMap();
-    if (!map) return;
-
-    updateStatusPanel();
-    updateLogs();
-    startLiveLogs();   // ← activation du streaming LIVE
-});
+// ============================
+// INITIALISATION UNIQUE
+// ============================
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("[APP] Initialisation…");
@@ -50,6 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     console.log("[APP] Carte prête. Modules chargés.");
+
+    // Modules de monitoring
+    updateStatusPanel();
+    updateLogs();
+    startLiveLogs();
 });
 
 // ============================
