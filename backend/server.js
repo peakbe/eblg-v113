@@ -68,7 +68,7 @@ app.get("/metar", async (req, res) => {
 // =========================
 app.get("/taf", async (req, res) => {
     const data = await safeFetch(
-        `https://api.checkwx.com/metar/EBLG/decoded?x-api-key=${process.env.CHECKWX_KEY}`
+        `https://api.checkwx.com/taf/EBLG/decoded?x-api-key=${process.env.CHECKWX_KEY}`
     );
 
     if (data.fallback) {
