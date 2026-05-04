@@ -1,57 +1,34 @@
 import { API_BASE } from "./config.js";
 
-const statusPanel = document.getElementById("status-panel");
+export async function checkApiStatus() {
+    const panel = document.getElementById("status-panel");
+    if (!panel) return;
 
-async function checkEndpoint(name, endpoint) {
-    const start = performance.now();
+    const endpoints = [
+        { name: "CheckWX METAR", url: `${API_BASE}/metar` },
+        { name: "CheckWX TAF", url: `${API_BASE}/taf` },
+        { name: "OpenSky FIDS", url: `${API_BASE}/fids` },
+        { name: "Backend Render", url: `${API_BASE}/sonos` }
+    ];
 
-    try {
-        const res = await fetch(`${PROXY}/${endpoint}`);
-        const time = Math.round(performance.now() - start);
+    panel.innerHTML = "";
 
-        const json = await res.json();
+    for (const ep of endpoints) {
+        const t0 = performance.now();
+        let status = "OK";
 
-        if (json.fallback) {
-            return {
-                name,
-                status: "warn",
-                time,
-                message: "Fallback"
-            };
+        try {
+            const res = await fetch(ep.url);
+            if (!res.ok) status = "ERR";
+        } catch (e) {
+            status = "ERR";
         }
 
-        return {
-            name,
-            status: "ok",
-            time,
-            message: "OK"
-        };
+        const dt = Math.round(performance.now() - t0);
 
-    } catch (err) {
-        return {
-            name,
-            status: "error",
-            time: null,
-            message: "Erreur"
-        };
+        const div = document.createElement("div");
+        div.className = "status-item " + (status === "OK" ? "status-ok" : "status-error");
+        div.textContent = `${ep.name} — ${dt} ms`;
+        panel.appendChild(div);
     }
 }
-
-export async function updateStatusPanel() {
-    const results = await Promise.all([
-        checkEndpoint("CheckWX METAR", "metar"),
-        checkEndpoint("CheckWX TAF", "taf"),
-        checkEndpoint("OpenSky FIDS", "fids"),
-        checkEndpoint("Backend Render", "sonos")
-    ]);
-
-    statusPanel.innerHTML = results.map(r => `
-        <div class="status-item status-${r.status}">
-            <span>${r.name}</span>
-            <span>${r.time ? r.time + " ms" : r.message}</span>
-        </div>
-    `).join("");
-}
-
-// Mise à jour toutes les 30 secondes
-setInterval(updateStatusPanel, 30000);
