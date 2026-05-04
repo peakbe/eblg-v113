@@ -1,52 +1,25 @@
 import { API_BASE } from "./config.js";
 
-const logsPanel = document.getElementById("logs-panel");
-const logs = []; // historique rotatif
+export async function loadLogs() {
+    const panel = document.getElementById("logs-panel");
+    if (!panel) return;
 
-function addLog(status, message) {
-    const entry = {
-        status,
-        message,
-        time: new Date().toLocaleTimeString()
-    };
-
-    logs.unshift(entry);
-    if (logs.length > 10) logs.pop();
-
-    renderLogs();
-}
-
-function renderLogs() {
-    logsPanel.innerHTML = logs.map(log => `
-        <div class="log-entry log-${log.status}">
-            <span class="log-time">${log.time}</span>
-            ${log.message}
-        </div>
-    `).join("");
-}
-
-async function testEndpoint(name, endpoint) {
     try {
-        const res = await fetch(`${PROXY}/${endpoint}`);
-        const json = await res.json();
+        const res = await fetch(`${API_BASE}/fids`);
+        const t0 = performance.now();
 
-        if (json.fallback) {
-            addLog("warn", `${name} → fallback`);
-        } else {
-            addLog("ok", `${name} → OK`);
-        }
+        const ok = res.ok ? "OK" : "ERR";
+        const dt = Math.round(performance.now() - t0);
+
+        const div = document.createElement("div");
+        div.className = "log-entry " + (ok === "OK" ? "log-ok" : "log-error");
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ${ok}`;
+        panel.appendChild(div);
 
     } catch (err) {
-        addLog("error", `${name} → erreur`);
+        const div = document.createElement("div");
+        div.className = "log-entry log-error";
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ERR`;
+        panel.appendChild(div);
     }
 }
-
-export function updateLogs() {
-    testEndpoint("METAR", "metar");
-    testEndpoint("TAF", "taf");
-    testEndpoint("FIDS", "fids");
-    testEndpoint("Backend", "sonos");
-}
-
-// Mise à jour toutes les 30 secondes
-setInterval(updateLogs, 30000);
