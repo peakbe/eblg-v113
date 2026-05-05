@@ -3,7 +3,7 @@ import cors from "cors";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
-import { SONOMETERS } from "./sonometers-data.js";
+import { SONOMETERS } from "./sonometers.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
